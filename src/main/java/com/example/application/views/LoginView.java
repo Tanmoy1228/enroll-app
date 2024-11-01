@@ -4,6 +4,7 @@ import com.example.application.dto.UserDto;
 import com.example.application.exceptions.UserException;
 import com.example.application.security.AuthService;
 import com.example.application.services.UserService;
+import com.example.application.utils.TranslationUtils;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -34,6 +35,7 @@ public class LoginView extends VerticalLayout {
 
     private final AuthService authService;
     private final UserService userService;
+    private final FlagsLayout flagsLayout;
 
     private final TextField loginEmail;
     private final PasswordField loginPassword;
@@ -50,17 +52,18 @@ public class LoginView extends VerticalLayout {
             "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"
     );
 
-    public LoginView(AuthService authService, UserService userService) {
+    public LoginView(AuthService authService, UserService userService, FlagsLayout flagsLayout) {
 
         this.authService = authService;
         this.userService = userService;
+        this.flagsLayout = flagsLayout;
 
-        loginEmail = createTextField("Email");
-        loginPassword = createPasswordField("Password");
+        loginEmail = createTextField(TranslationUtils.getTranslation("login.email"));
+        loginPassword = createPasswordField(TranslationUtils.getTranslation("login.password"));
 
-        registerEmail = createTextField("Email");
-        registerPassword = createPasswordField("Password");
-        registerRetypePassword = createPasswordField("Retype Password");
+        registerEmail = createTextField(TranslationUtils.getTranslation("register.email"));
+        registerPassword = createPasswordField(TranslationUtils.getTranslation("register.password"));
+        registerRetypePassword = createPasswordField(TranslationUtils.getTranslation("register.retype-password"));
 
         HorizontalLayout loginLayout = new HorizontalLayout(configureLoginForm());
         HorizontalLayout registerLayout = new HorizontalLayout(configureRegistrationForm());
@@ -68,14 +71,16 @@ public class LoginView extends VerticalLayout {
         loginLayout.setVisible(true);
         registerLayout.setVisible(false);
 
-        loginTab = new Tab("Login");
-        registerTab = new Tab("Registration");
+        loginTab = new Tab(TranslationUtils.getTranslation("login.tab"));
+        registerTab = new Tab(TranslationUtils.getTranslation("register.tab"));
 
         tabs = createTabs();
         configureTabs(loginLayout, registerLayout);
 
         setupMainLayout();
-        add(tabs, loginLayout, registerLayout);
+        setupFlagsLayout();
+
+        add(tabs, loginLayout, registerLayout, this.flagsLayout);
     }
 
     private TextField createTextField(String label) {
@@ -116,13 +121,21 @@ public class LoginView extends VerticalLayout {
         getStyle().set("position", "relative");
     }
 
+    private void setupFlagsLayout() {
+
+        flagsLayout.setWidthFull();
+        flagsLayout.setPadding(true);
+        flagsLayout.setJustifyContentMode(JustifyContentMode.END);
+        flagsLayout.getStyle().set("position", "absolute").set("top", "0").set("right", "0");
+    }
+
     private VerticalLayout configureLoginForm() {
 
         VerticalLayout loginLayout = new VerticalLayout();
         loginLayout.setWidth("400px");
 
-        Span loginTitle = createTitle("Please Login");
-        Button loginButton = createButton("Login", this::login);
+        Span loginTitle = createTitle(TranslationUtils.getTranslation("login.title"));
+        Button loginButton = createButton(TranslationUtils.getTranslation("login.button"), this::login);
         Span forgotPasswordLink = forgotPasswordLink();
 
         loginLayout.add(loginTitle, loginEmail, loginPassword, loginButton, forgotPasswordLink);
@@ -135,8 +148,8 @@ public class LoginView extends VerticalLayout {
         VerticalLayout registerLayout = new VerticalLayout();
         registerLayout.setWidth("400px");
 
-        Span registerTitle = createTitle("Please Register");
-        Button registerButton = createButton("Register", this::register);
+        Span registerTitle = createTitle(TranslationUtils.getTranslation("register.title"));
+        Button registerButton = createButton(TranslationUtils.getTranslation("register.button"), this::register);
 
         registerLayout.add(registerTitle, registerEmail, registerPassword, registerRetypePassword, registerButton);
 
@@ -165,7 +178,7 @@ public class LoginView extends VerticalLayout {
 
     private Span forgotPasswordLink() {
 
-        Span forgotPasswordLink = new Span("Can't access my account");
+        Span forgotPasswordLink = new Span(TranslationUtils.getTranslation("login.forgot-password"));
 
         forgotPasswordLink.getStyle()
                 .set("color", "#007bff")
@@ -177,7 +190,8 @@ public class LoginView extends VerticalLayout {
 
     private void login() {
 
-        if (!isFieldValid(loginEmail, "Email") || !isEmailValid(loginEmail) || !isFieldValid(loginPassword, "Password")) {
+        if (!isFieldValid(loginEmail, TranslationUtils.getTranslation("login.email")) || !isEmailValid(loginEmail) ||
+                !isFieldValid(loginPassword, TranslationUtils.getTranslation("login.password"))) {
             return;
         }
 
@@ -190,7 +204,7 @@ public class LoginView extends VerticalLayout {
 
             if (loginSuccessful) {
 
-                Notification.show("Login successful.", 1000, Notification.Position.TOP_CENTER);
+                Notification.show(TranslationUtils.getTranslation("login.success-message"), 1000, Notification.Position.TOP_CENTER);
 
                 VaadinSession.getCurrent().setAttribute("email", email);
 
@@ -199,25 +213,26 @@ public class LoginView extends VerticalLayout {
                 UI.getCurrent().navigate(BasicInformationView.class);
 
             } else {
-                Notification.show("Login failed: Invalid credentials.", 3000, Notification.Position.TOP_CENTER);
+                Notification.show(TranslationUtils.getTranslation("login.failed-message.invalid-credentials"), 3000, Notification.Position.TOP_CENTER);
             }
 
         } catch (UserException e) {
 
-            Notification.show("Login failed: " + e.getMessage(), 3000, Notification.Position.TOP_CENTER);
+            Notification.show(TranslationUtils.getTranslation("login.failed-message", e.getMessage()), 3000, Notification.Position.TOP_CENTER);
 
         } catch (Exception e) {
 
             LOGGER.error("User login failed: email={}", email, e);
 
-            Notification.show("Login failed. Please try again later.", 3000, Notification.Position.TOP_CENTER);
+            Notification.show(TranslationUtils.getTranslation("login.failed-message.exception"), 3000, Notification.Position.TOP_CENTER);
         }
     }
 
     private void register() {
 
-        if (!isFieldValid(registerEmail, "Email") || !isEmailValid(registerEmail) ||
-                !isFieldValid(registerPassword, "Password") || !isFieldValid(registerRetypePassword, "Retype Password")) {
+        if (!isFieldValid(registerEmail, TranslationUtils.getTranslation("register.email")) || !isEmailValid(registerEmail) ||
+                !isFieldValid(registerPassword, TranslationUtils.getTranslation("register.password")) ||
+                !isFieldValid(registerRetypePassword, TranslationUtils.getTranslation("register.retype-password"))) {
             return;
         }
 
@@ -226,7 +241,7 @@ public class LoginView extends VerticalLayout {
         String retypePassword = registerRetypePassword.getValue();
 
         if (!password.equals(retypePassword)) {
-            Notification.show("Passwords don't match.", 1000, Notification.Position.TOP_CENTER);
+            Notification.show(TranslationUtils.getTranslation("register.password-mismatch-message"), 1000, Notification.Position.TOP_CENTER);
             return;
         }
 
@@ -237,19 +252,19 @@ public class LoginView extends VerticalLayout {
             userService.registerUser(userDto);
             tabs.setSelectedTab(loginTab);
 
-            Notification.show("Registration success.", 1000, Notification.Position.TOP_CENTER);
+            Notification.show(TranslationUtils.getTranslation("register.success-message"), 1000, Notification.Position.TOP_CENTER);
 
         } catch (UserException e) {
 
             LOGGER.error("User registration failed: Email={}", email, e);
 
-            Notification.show("Registration failed." + e.getMessage(), 3000, Notification.Position.TOP_CENTER);
+            Notification.show(TranslationUtils.getTranslation("register.failed-message", e.getMessage()), 3000, Notification.Position.TOP_CENTER);
 
         } catch (Exception e) {
 
             LOGGER.error("User registration failed: Email={}", email, e);
 
-            Notification.show("Registration failed. Please try again later.", 3000, Notification.Position.TOP_CENTER);
+            Notification.show(TranslationUtils.getTranslation("register.failed-message.exception"), 3000, Notification.Position.TOP_CENTER);
         }
     }
 
@@ -262,7 +277,7 @@ public class LoginView extends VerticalLayout {
         field.focus();
         field.setInvalid(true);
         field.getElement().callJsFunction("scrollIntoView");
-        Notification.show("Please provide a valid email.", 3000, Notification.Position.TOP_CENTER);
+        Notification.show(TranslationUtils.getTranslation("validation.invalid-email"), 3000, Notification.Position.TOP_CENTER);
 
         return false;
     }
@@ -274,7 +289,7 @@ public class LoginView extends VerticalLayout {
             field.focus();
             field.setInvalid(true);
             field.getElement().callJsFunction("scrollIntoView");
-            Notification.show(label + " cannot be empty", 3000, Notification.Position.TOP_CENTER);
+            Notification.show(TranslationUtils.getTranslation("validation.empty-field", label), 3000, Notification.Position.TOP_CENTER);
 
             return false;
         }

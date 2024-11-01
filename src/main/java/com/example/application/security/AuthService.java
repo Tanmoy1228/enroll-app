@@ -3,6 +3,7 @@ package com.example.application.security;
 import com.example.application.entity.User;
 import com.example.application.exceptions.UserException;
 import com.example.application.repository.UserRepository;
+import com.example.application.utils.TranslationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,7 +34,7 @@ public class AuthService implements UserDetailsService {
         Optional<User> user = userRepository.findByEmail(username);
 
         if (user.isEmpty()) {
-            throw new UserException("Username not found.");
+            throw new UserException(TranslationUtils.getTranslation("exception.email-not-found"));
         }
 
         return new org.springframework.security.core.userdetails.User(

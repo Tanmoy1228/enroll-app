@@ -5,6 +5,7 @@ import com.example.application.dto.UserDto;
 import com.example.application.entity.User;
 import com.example.application.exceptions.UserException;
 import com.example.application.repository.UserRepository;
+import com.example.application.utils.TranslationUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,7 +33,7 @@ public class UserServiceImpl implements UserService {
         Optional<User> user = userRepository.findByEmail(userDto.getEmail());
 
         if (user.isPresent()) {
-            throw new UserException("This username already registered.");
+            throw new UserException(TranslationUtils.getTranslation("exception.email-already-exist"));
         }
 
          User newUserToSave = new User(
