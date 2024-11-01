@@ -1,6 +1,11 @@
 package com.example.application.views;
 
+import com.example.application.dto.UserDto;
+import com.example.application.exceptions.UserException;
+import com.example.application.security.AuthService;
+import com.example.application.services.UserService;
 import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
@@ -13,6 +18,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.textfield.TextFieldBase;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,11 +26,14 @@ import org.apache.logging.log4j.Logger;
 import java.util.regex.Pattern;
 
 @AnonymousAllowed
-@Route(value = "")
+@Route(value = "login")
 @PageTitle("Login")
 public class LoginView extends VerticalLayout {
 
     private static final Logger LOGGER = LogManager.getLogger(LoginView.class);
+
+    private final AuthService authService;
+    private final UserService userService;
 
     private final TextField loginEmail;
     private final PasswordField loginPassword;
@@ -41,7 +50,10 @@ public class LoginView extends VerticalLayout {
             "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"
     );
 
-    public LoginView() {
+    public LoginView(AuthService authService, UserService userService) {
+
+        this.authService = authService;
+        this.userService = userService;
 
         loginEmail = createTextField("Email");
         loginPassword = createPasswordField("Password");
@@ -169,17 +181,76 @@ public class LoginView extends VerticalLayout {
             return;
         }
 
-        LOGGER.info("Login button clicked");
+        String email = loginEmail.getValue();
+        String password = loginPassword.getValue();
+
+        try {
+
+            boolean loginSuccessful = authService.isAuthenticatedUser(email, password);
+
+            if (loginSuccessful) {
+
+                Notification.show("Login successful.", 1000, Notification.Position.TOP_CENTER);
+
+                VaadinSession.getCurrent().setAttribute("email", email);
+
+                LOGGER.info("Logged in successfully. Email={}", VaadinSession.getCurrent().getAttribute("email"));
+
+                UI.getCurrent().navigate(BasicInformationView.class);
+
+            } else {
+                Notification.show("Login failed: Invalid credentials.", 3000, Notification.Position.TOP_CENTER);
+            }
+
+        } catch (UserException e) {
+
+            Notification.show("Login failed: " + e.getMessage(), 3000, Notification.Position.TOP_CENTER);
+
+        } catch (Exception e) {
+
+            LOGGER.error("User login failed: email={}", email, e);
+
+            Notification.show("Login failed. Please try again later.", 3000, Notification.Position.TOP_CENTER);
+        }
     }
 
     private void register() {
 
         if (!isFieldValid(registerEmail, "Email") || !isEmailValid(registerEmail) ||
-                !isFieldValid(registerPassword, "Password") || !isFieldValid(registerRetypePassword, "Password")) {
+                !isFieldValid(registerPassword, "Password") || !isFieldValid(registerRetypePassword, "Retype Password")) {
             return;
         }
 
-        LOGGER.info("Register button clicked");
+        String email = registerEmail.getValue();
+        String password = registerPassword.getValue();
+        String retypePassword = registerRetypePassword.getValue();
+
+        if (!password.equals(retypePassword)) {
+            Notification.show("Passwords don't match.", 1000, Notification.Position.TOP_CENTER);
+            return;
+        }
+
+        try {
+
+            UserDto userDto = new UserDto(email, password);
+
+            userService.registerUser(userDto);
+            tabs.setSelectedTab(loginTab);
+
+            Notification.show("Registration success.", 1000, Notification.Position.TOP_CENTER);
+
+        } catch (UserException e) {
+
+            LOGGER.error("User registration failed: Email={}", email, e);
+
+            Notification.show("Registration failed." + e.getMessage(), 3000, Notification.Position.TOP_CENTER);
+
+        } catch (Exception e) {
+
+            LOGGER.error("User registration failed: Email={}", email, e);
+
+            Notification.show("Registration failed. Please try again later.", 3000, Notification.Position.TOP_CENTER);
+        }
     }
 
     private boolean isEmailValid(TextField field) {
