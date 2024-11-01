@@ -6,4 +6,6 @@ public interface UserService {
 
     void registerUser(UserDto userDto) throws Exception;
 
+    UserDto getUserByEmail(String email);
+
 }

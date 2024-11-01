@@ -207,6 +207,7 @@ public class LoginView extends VerticalLayout {
                 Notification.show(TranslationUtils.getTranslation("login.success-message"), 1000, Notification.Position.TOP_CENTER);
 
                 VaadinSession.getCurrent().setAttribute("email", email);
+                VaadinSession.getCurrent().setAttribute("selectedTabIndex", 0);
 
                 LOGGER.info("Logged in successfully. Email={}", VaadinSession.getCurrent().getAttribute("email"));
 

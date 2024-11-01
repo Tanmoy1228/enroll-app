@@ -15,6 +15,12 @@ public class UserDto {
         this.password = password;
     }
 
+    public UserDto(String email, String password, String status) {
+        this.email = email;
+        this.status = status;
+        this.password = password;
+    }
+
     public Long getId() {
         return id;
     }

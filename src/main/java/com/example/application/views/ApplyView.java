@@ -6,14 +6,11 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 @AnonymousAllowed
-@Route(value = "basic-information", layout = MainLayout.class)
-@PageTitle("Basic Info")
-public class BasicInformationView extends SecuredView {
+@PageTitle("Apply")
+@Route(value = "apply", layout = MainLayout.class)
+public class ApplyView extends SecuredView {
 
-    public BasicInformationView() {
-
-        add(new H1("Basic Information"));
-
+    public ApplyView() {
+        add(new H1("Apply View"));
     }
 }
-

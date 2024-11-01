@@ -1,79 +1,147 @@
 package com.example.application.views;
 
+import com.example.application.services.UserService;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
-import com.vaadin.flow.component.html.Footer;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.Header;
-import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.SvgIcon;
-import com.vaadin.flow.component.orderedlayout.Scroller;
-import com.vaadin.flow.component.sidenav.SideNav;
-import com.vaadin.flow.component.sidenav.SideNavItem;
-import com.vaadin.flow.server.menu.MenuConfiguration;
-import com.vaadin.flow.server.menu.MenuEntry;
-import com.vaadin.flow.theme.lumo.LumoUtility;
-import java.util.List;
-
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.component.tabs.TabsVariant;
+import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.server.VaadinSession;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class MainLayout extends AppLayout {
 
-    private H1 viewTitle;
+    private static final Logger LOGGER = LogManager.getLogger(MainLayout.class);
 
-    public MainLayout() {
+    private final UserService userService;
+
+    public MainLayout(UserService userService) {
+
+        this.userService = userService;
+
         setPrimarySection(Section.DRAWER);
-        addDrawerContent();
-        addHeaderContent();
+        addToDrawer(createDrawerContent());
+        addToNavbar(true, createHeader());
     }
 
-    private void addHeaderContent() {
-        DrawerToggle toggle = new DrawerToggle();
-        toggle.setAriaLabel("Menu toggle");
+    private HorizontalLayout createHeader() {
 
-        viewTitle = new H1();
-        viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
+        FlagsLayout flagsLayout = new FlagsLayout();
+        ProfileLayout profileInfoLayout = new ProfileLayout(userService);
 
-        addToNavbar(true, toggle, viewTitle);
+        VerticalLayout flagsAndProfileLayout = new VerticalLayout(flagsLayout, profileInfoLayout);
+        flagsAndProfileLayout.setSpacing(false);
+        flagsAndProfileLayout.setPadding(false);
+        flagsAndProfileLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+
+        DrawerToggle drawerToggle = new DrawerToggle();
+        drawerToggle.getStyle().set("margin-right", "80%");
+
+        HorizontalLayout header = new HorizontalLayout(drawerToggle, flagsAndProfileLayout);
+        header.setId("header");
+        header.setWidthFull();
+        header.setSpacing(false);
+        header.setAlignItems(FlexComponent.Alignment.CENTER);
+        header.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+        header.getStyle().set("padding", "10px").set("border-bottom", "5px solid #002f6c");
+
+        return header;
     }
 
-    private void addDrawerContent() {
-        Span appName = new Span("Enroll App");
-        appName.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.LARGE);
-        Header header = new Header(appName);
+    private Component createDrawerContent() {
 
-        Scroller scroller = new Scroller(createNavigation());
+        VerticalLayout layout = new VerticalLayout();
 
-        addToDrawer(header, scroller, createFooter());
-    }
+        layout.setSizeFull();
+        layout.setPadding(false);
+        layout.setSpacing(false);
+        layout.getThemeList().set("spacing-s", true);
+        layout.setAlignItems(FlexComponent.Alignment.STRETCH);
 
-    private SideNav createNavigation() {
-        SideNav nav = new SideNav();
+        HorizontalLayout logoLayout = new HorizontalLayout();
+        logoLayout.setId("logo");
+        logoLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+        logoLayout.add(new Image("images/ala-too-logo.png", ""));
+        logoLayout.getStyle().set("margin-top", "10px").set("margin-left", "10px");
 
-        List<MenuEntry> menuEntries = MenuConfiguration.getMenuEntries();
-        menuEntries.forEach(entry -> {
-            if (entry.icon() != null) {
-                nav.addItem(new SideNavItem(entry.title(), entry.path(), new SvgIcon(entry.icon())));
-            } else {
-                nav.addItem(new SideNavItem(entry.title(), entry.path()));
-            }
-        });
-
-        return nav;
-    }
-
-    private Footer createFooter() {
-        Footer layout = new Footer();
+        Tabs menus = createMenus();
+        layout.add(logoLayout, menus);
 
         return layout;
     }
 
-    @Override
-    protected void afterNavigation() {
-        super.afterNavigation();
-        viewTitle.setText(getCurrentPageTitle());
+    private Tabs createMenus() {
+
+        final Tabs tabs = new Tabs();
+        tabs.setOrientation(Tabs.Orientation.VERTICAL);
+        tabs.addThemeVariants(TabsVariant.LUMO_MINIMAL);
+        tabs.setId("tabs");
+
+        Tab[] menuItems = createMenuItems();
+        tabs.add(menuItems);
+
+        Integer selectedIndex = (Integer) VaadinSession.getCurrent().getAttribute("selectedTabIndex");
+
+        if (selectedIndex != null && selectedIndex >= 0 && selectedIndex < menuItems.length) {
+            tabs.setSelectedIndex(selectedIndex);
+            styleSelectedTab(menuItems[selectedIndex]);
+        }
+
+        tabs.addSelectedChangeListener(event -> {
+
+            for (Tab tab : menuItems) {
+                tab.getStyle().remove("color").remove("background-color");
+            }
+
+            styleSelectedTab(event.getSelectedTab());
+            VaadinSession.getCurrent().setAttribute("selectedTabIndex", tabs.getSelectedIndex());
+        });
+
+        return tabs;
     }
 
-    private String getCurrentPageTitle() {
-        return MenuConfiguration.getPageHeader(getContent()).orElse("");
+    private void styleSelectedTab(Tab selectedTab) {
+        selectedTab.getStyle().set("background-color", "#005b9a").set("color", "white");
+    }
+
+    private Tab[] createMenuItems() {
+        return new Tab[] {
+                createTab("Main", BasicInformationView.class),
+                createTab("Choices and Education", EducationInformationView.class),
+                createTab("Contacts and Address", ContactInformationView.class),
+                createTab("Relatives Info", RelativesInformationView.class),
+                createTab("Apply", ApplyView.class),
+                createLogoutTab()
+        };
+    }
+
+    private Tab createLogoutTab() {
+        Tab logoutTab = new Tab("Log out");
+        logoutTab.getElement().addEventListener("click", event -> logout());
+        logoutTab.getStyle().set("font-size", "20px").set("font-weight", "bold").set("margin-top", "50px").set("cursor", "pointer");
+        return logoutTab;
+    }
+
+    private void logout() {
+        VaadinSession.getCurrent().getSession().invalidate();
+        VaadinSession.getCurrent().close();
+        getUI().ifPresent(ui -> ui.getPage().setLocation("/login"));
+    }
+
+    private static Tab createTab(String text, Class<? extends Component> navigationTarget) {
+
+        Tab tab = new Tab();
+        tab.add(new RouterLink(text, navigationTarget));
+        ComponentUtil.setData(tab, Class.class, navigationTarget);
+        tab.getStyle().set("font-size", "20px").set("font-weight", "bold").set("margin-top", "20px");
+        return tab;
     }
 }
