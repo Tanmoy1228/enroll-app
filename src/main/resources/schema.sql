@@ -7,3 +7,14 @@ create table if not exists users (
     status varchar(20) not null,
     CONSTRAINT UK_users_email UNIQUE (email)
 );
+
+create table if not exists country (
+    id BIGSERIAL primary key,
+    name varchar(100) not null
+);
+
+create table if not exists nationality (
+    id BIGSERIAL primary key,
+    name varchar(100) not null
+);
+
