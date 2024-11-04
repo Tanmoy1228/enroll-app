@@ -1,5 +1,6 @@
 package com.example.application.views;
 
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -9,6 +10,9 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.server.StreamResource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 public class ImageUploader extends VerticalLayout {
 
@@ -27,6 +31,9 @@ public class ImageUploader extends VerticalLayout {
 
     private HorizontalLayout upload1Layout = new HorizontalLayout();
     private HorizontalLayout upload2Layout = new HorizontalLayout();
+
+    private Button removeButton1;
+    private Button removeButton2;
 
     public ImageUploader(boolean isSingleImageMode) {
 
@@ -47,7 +54,7 @@ public class ImageUploader extends VerticalLayout {
             uploadedImage1 = visibleAndGetUploadedImage(buffer1, event.getFileName());
             upload1Layout.add(uploadedImage1);
 
-            if (!isSingleImageMode) {
+            if (!isSingleImageMode && uploadedImage2 == null) {
                 handleImageUpload2Visibility(upload2, upload2Layout, true);
             }
         });
@@ -118,4 +125,99 @@ public class ImageUploader extends VerticalLayout {
         StreamResource resource = new StreamResource(fileName, buffer::getInputStream);
         return new Image(resource, "Uploaded image");
     }
+
+    public boolean isImage1Present() {
+        return uploadedImage1 != null;
+    }
+
+    public boolean isImage2Present() {
+        return uploadedImage2 != null;
+    }
+
+    public byte[] getUploadedImage1AsBytes() {
+
+        if (uploadedImage1 != null) {
+
+            try {
+                return buffer1.getInputStream().readAllBytes();
+
+            } catch (IOException e) {
+                LOGGER.error("Convert input stream to byte array, Error: ", e);
+            }
+        }
+
+        return null;
+    }
+
+    public byte[] getUploadedImage2AsBytes() {
+
+        if (uploadedImage2 != null) {
+
+            try {
+                return buffer2.getInputStream().readAllBytes();
+
+            } catch (IOException e) {
+                LOGGER.error("Convert input stream to byte array, Error: ", e);
+            }
+        }
+
+        return null;
+    }
+
+    public void loadImage1(byte[] imageData) {
+
+        if (imageData != null) {
+            removeButton1 = new Button("Remove", event -> clearImage1());
+
+            showImage2(imageData);
+            upload1.setVisible(false);
+            upload1Layout.add(removeButton1);
+
+            if (!isSingleImageMode) {
+                handleImageUpload2Visibility(upload2, upload2Layout, true);
+            }
+        }
+    }
+
+    public void loadImage2(byte[] imageData) {
+
+        if (imageData != null) {
+            removeButton2 = new Button("Remove", event -> clearImage2());
+
+            showImage1(imageData);
+            upload2.setVisible(false);
+            upload2Layout.add(removeButton2);
+        }
+    }
+
+    private void showImage2(byte[] imageData) {
+        StreamResource resource = new StreamResource("image1", () -> new ByteArrayInputStream(imageData));
+        uploadedImage1 = new Image(resource, "Image 1");
+        uploadedImage1.setWidth("150px");
+        uploadedImage1.setHeight("150px");
+        upload1Layout.add(uploadedImage1);
+    }
+
+    private void showImage1(byte[] imageData) {
+        StreamResource resource = new StreamResource("image2", () -> new ByteArrayInputStream(imageData));
+        uploadedImage2 = new Image(resource, "Image 2");
+        uploadedImage2.setWidth("150px");
+        uploadedImage2.setHeight("150px");
+        upload2Layout.add(uploadedImage2);
+    }
+
+    private void clearImage1() {
+        uploadedImage1.setVisible(false);
+        removeButton1.setVisible(false);
+        uploadedImage1 = null;
+        upload1.setVisible(true);
+    }
+
+    private void clearImage2() {
+        uploadedImage2.setVisible(false);
+        removeButton2.setVisible(false);
+        uploadedImage2 = null;
+        upload2.setVisible(true);
+    }
+
 }

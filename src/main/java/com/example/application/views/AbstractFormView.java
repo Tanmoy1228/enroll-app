@@ -27,9 +27,9 @@ public abstract class AbstractFormView extends SecuredView {
         return textField;
     }
 
-    protected static ComboBox<String> createComboBox(String placeholder) {
+    protected static <T> ComboBox<T> createComboBox(String placeholder) {
 
-        ComboBox<String> comboBox = new ComboBox<>();
+        ComboBox<T> comboBox = new ComboBox<>();
 
         comboBox.setPlaceholder(placeholder);
         comboBox.getElement().setProperty("title", placeholder);
