@@ -87,3 +87,25 @@ create table if not exists schools (
     CONSTRAINT UK_schools_address_id FOREIGN KEY (address_id) REFERENCES addresses (id)
 );
 
+create table if not exists education_info (
+    id BIGSERIAL PRIMARY KEY,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    level_id BIGINT NOT NULL,
+    course_id BIGINT NOT NULL,
+    country_id BIGINT NOT NULL,
+    address_id BIGINT NOT NULL,
+    school_id BIGINT NOT NULL,
+    language_id BIGINT NOT NULL,
+    attestat_type_id BIGINT NOT NULL,
+    attestat_no VARCHAR(20) NOT NULL,
+    given_date DATE NOT NULL,
+    document_image_1 oid,
+    document_image_2 oid,
+    attend_ort boolean,
+    registration_number VARCHAR(20),
+    exam_score double precision,
+    issue_date DATE,
+    ort_certificate_image oid,
+    CONSTRAINT UK_education_info_email UNIQUE (email)
+);
+
