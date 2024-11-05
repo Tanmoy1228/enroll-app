@@ -5,8 +5,8 @@ import jakarta.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(name = "country")
-public class Country {
+@Table(name = "levels")
+public class Level {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,8 +15,8 @@ public class Country {
     @Column(name = "name", columnDefinition = "VARCHAR(255)", nullable=false)
     private String name;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "country")
-    private List<Address> addresses;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "level")
+    private List<Faculty>faculties;
 
     public Long getId() {
         return id;
@@ -34,11 +34,11 @@ public class Country {
         this.name = name;
     }
 
-    public List<Address> getAddresses() {
-        return addresses;
+    public List<Faculty> getFaculties() {
+        return faculties;
     }
 
-    public void setAddresses(List<Address> addresses) {
-        this.addresses = addresses;
+    public void setFaculties(List<Faculty> faculties) {
+        this.faculties = faculties;
     }
 }

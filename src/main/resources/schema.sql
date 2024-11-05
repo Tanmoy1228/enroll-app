@@ -42,4 +42,48 @@ create table if not exists basic_info (
     CONSTRAINT UK_basic_info_email UNIQUE (email)
 );
 
+create table if not exists languages (
+    id BIGSERIAL primary key,
+    name varchar(100) not null
+);
+
+create table if not exists attestat_types (
+    id BIGSERIAL primary key,
+    name varchar(100) not null
+);
+
+create table if not exists levels (
+    id BIGSERIAL primary key,
+    name varchar(100) not null
+);
+
+create table if not exists faculties (
+    id BIGSERIAL primary key,
+    level_id BIGINT not null,
+    name varchar(100) not null,
+    CONSTRAINT UK_faculty_level_id FOREIGN KEY (level_id) REFERENCES levels (id)
+);
+
+create table if not exists courses (
+    id BIGSERIAL primary key,
+    code varchar(50) not null,
+    faculty_id BIGINT not null,
+    name varchar(255) not null,
+    CONSTRAINT UK_courses_code UNIQUE (code),
+    CONSTRAINT UK_courses_faculty_id FOREIGN KEY (faculty_id) REFERENCES faculties (id)
+);
+
+create table if not exists addresses (
+    id BIGSERIAL primary key,
+    country_id BIGINT not null,
+    name varchar(100) not null,
+    CONSTRAINT UK_address_country_id FOREIGN KEY (country_id) REFERENCES country (id)
+);
+
+create table if not exists schools (
+    id BIGSERIAL primary key,
+    address_id BIGINT not null,
+    name varchar(255) not null,
+    CONSTRAINT UK_schools_address_id FOREIGN KEY (address_id) REFERENCES addresses (id)
+);
 
