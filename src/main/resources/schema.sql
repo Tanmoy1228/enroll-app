@@ -109,3 +109,10 @@ create table if not exists education_info (
     CONSTRAINT UK_education_info_email UNIQUE (email)
 );
 
+create table if not exists contacts (
+    id BIGSERIAL primary key,
+    email varchar(100) not null,
+    type varchar(100) not null,
+    contact varchar(100) not null
+);
+

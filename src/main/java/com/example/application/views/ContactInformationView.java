@@ -15,7 +15,7 @@ public class ContactInformationView extends SecuredView {
 
     private static final Logger LOGGER = LogManager.getLogger(ContactInformationView.class);
 
-    private final ContactComponent contactComponent = new ContactComponent();
+    private final ContactComponent contactComponent;
 
     private final AddressComponent registrationAddress = new AddressComponent(TranslationUtils.getTranslation("addressInfo.title.registerAddress"));
     private final AddressComponent currentAddress = new AddressComponent(TranslationUtils.getTranslation("addressInfo.title.currentAddress"));
@@ -23,7 +23,8 @@ public class ContactInformationView extends SecuredView {
 
     private final Button nextPageButton = new Button(TranslationUtils.getTranslation("button.label.next-page"));
 
-    public ContactInformationView() {
+    public ContactInformationView(ContactComponent contactComponent) {
+        this.contactComponent = contactComponent;
 
         setSpacing(true);
         setPadding(true);

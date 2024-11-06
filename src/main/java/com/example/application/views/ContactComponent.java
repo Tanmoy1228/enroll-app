@@ -1,6 +1,7 @@
 package com.example.application.views;
 
 import com.example.application.dto.ContactType;
+import com.example.application.services.ContactService;
 import com.example.application.utils.TranslationUtils;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -12,12 +13,19 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.textfield.TextField;
 import com.example.application.entity.Contact;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.validator.StringLengthValidator;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.spring.annotation.SpringComponent;
+import com.vaadin.flow.spring.annotation.UIScope;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@UIScope
+@SpringComponent
 public class ContactComponent extends VerticalLayout {
 
     private static final Logger LOGGER = LogManager.getLogger(ContactComponent.class);
@@ -30,9 +38,14 @@ public class ContactComponent extends VerticalLayout {
     private final TextField contactField = new TextField(TranslationUtils.getTranslation("contactInfo.label.contacts"));
     private final Button saveContactButton = new Button(TranslationUtils.getTranslation("contactInfo.button.add"));
 
-    private final List<Contact> contacts = new ArrayList<>();
+    private Contact currentContact = null;
+    private final ContactService contactService;
+    private List<Contact> contacts = new ArrayList<>();
+    private final Binder<Contact> binder = new Binder<>(Contact.class);
 
-    public ContactComponent() {
+    public ContactComponent(ContactService contactService) {
+
+        this.contactService = contactService;
 
         setSpacing(true);
         setPadding(true);
@@ -43,7 +56,8 @@ public class ContactComponent extends VerticalLayout {
         configureAddContactDialog();
 
         add(new H3(TranslationUtils.getTranslation("contactInfo.title")), contactsGrid, addContactButton);
-        setContacts(new ArrayList<>());
+
+        addAttachListener(event -> initializeData());
     }
 
     private void configureContactsGrid() {
@@ -54,7 +68,17 @@ public class ContactComponent extends VerticalLayout {
 
     private void configureAddContactButton() {
         addContactButton.getStyle().set("margin-left", "auto");
-        addContactButton.addClickListener(event -> addContactDialog.open());
+        addContactButton.addClickListener(event -> openAddContactDialog());
+    }
+
+    private void openAddContactDialog() {
+
+        currentContact = new Contact();
+        binder.readBean(currentContact);
+
+        typeField.clear();
+        contactField.clear();
+        addContactDialog.open();
     }
 
     private void configureAddContactDialog() {
@@ -64,30 +88,46 @@ public class ContactComponent extends VerticalLayout {
 
         typeField.setItems(ContactType.values());
         typeField.setItemLabelGenerator(ContactType::getCode);
-        saveContactButton.addClickListener(event -> handleSaveContact(typeField, contactField));
+        saveContactButton.addClickListener(event -> handleSaveContact());
 
         HorizontalLayout dialogLayout = new HorizontalLayout(typeField, contactField, saveContactButton);
 
         addContactDialog.add(dialogLayout);
-        dialogLayout.setAlignItems(Alignment.END);
+        dialogLayout.setAlignItems(Alignment.BASELINE);
     }
 
-    private void handleSaveContact(ComboBox<ContactType> typeField, TextField contactField) {
+    private void handleSaveContact() {
 
-        ContactType type = typeField.getValue();
-        String contactValue = contactField.getValue();
+        if(checkDuplicateContact()) {
+            Notification.show(TranslationUtils.getTranslation("notification.duplicateContact"), 1000, Notification.Position.TOP_CENTER);
+            return;
+        }
 
-        if (type != null && !contactValue.isEmpty()) {
+        if (binder.writeBeanIfValid(currentContact)) {
 
-            Contact newContact = new Contact(type, contactValue);
-            contacts.add(newContact);
+            currentContact.setEmail((String) VaadinSession.getCurrent().getAttribute("email"));
+
+            try {
+                contactService.save(currentContact);
+
+                if (!contacts.contains(currentContact)) {
+                    contacts.add(currentContact);
+                } else {
+                    contactsGrid.getDataProvider().refreshItem(currentContact);
+                }
+                Notification.show(TranslationUtils.getTranslation("notification.dataSavedSuccessfully"), 1000, Notification.Position.TOP_CENTER);
+
+            } catch (Exception e) {
+                Notification.show(TranslationUtils.getTranslation("notification.contactNotSaved"), 1000, Notification.Position.TOP_CENTER);
+            }
+
             setContacts(contacts);
 
             typeField.clear();
             contactField.clear();
             addContactDialog.close();
         } else {
-            Notification.show(TranslationUtils.getTranslation("notification.fillFieldsCorrectly"));
+            Notification.show(TranslationUtils.getTranslation("notification.fillFieldsCorrectly"), 1000, Notification.Position.TOP_CENTER);
         }
     }
 
@@ -98,12 +138,24 @@ public class ContactComponent extends VerticalLayout {
     }
 
     private void editContact(Contact contact) {
-        Notification.show("Edit Clicked for: " + contact.getContact());
+
+        currentContact = contact;
+        binder.readBean(currentContact);
+
+        typeField.setValue(contact.getType());
+        contactField.setValue(contact.getContact());
+        addContactDialog.open();
     }
 
     private void deleteContact(Contact contact) {
-        contacts.remove(contact);
-        setContacts(contacts);
+
+        try {
+            contactService.deleteContact(contact.getId());
+            contacts.remove(contact);
+            setContacts(contacts);
+        } catch (Exception e) {
+            Notification.show(TranslationUtils.getTranslation("notification.contactNotDelete"), 1000, Notification.Position.TOP_CENTER);
+        }
     }
 
     public void setContacts(List<Contact> contacts) {
@@ -126,5 +178,43 @@ public class ContactComponent extends VerticalLayout {
         }
 
         contactsGrid.setItems(contacts);
+    }
+
+    private void initializeData() {
+
+        loadContacts();
+        configureBinder();
+    }
+
+    private void loadContacts() {
+
+        String email = (String) VaadinSession.getCurrent().getAttribute("email");
+
+        contacts = contactService.getAllContacts(email);
+        setContacts(contacts);
+    }
+
+    private boolean checkDuplicateContact() {
+
+        for (Contact contact : contacts) {
+            if (!contact.equals(currentContact) && contact.getContact().trim().equals(currentContact.getContact().trim())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void configureBinder() {
+
+        binder.forField(typeField)
+                .asRequired(TranslationUtils.getTranslation("validation.required.type"))
+                .bind(Contact::getType, Contact::setType);
+
+        binder.forField(contactField)
+                .asRequired(TranslationUtils.getTranslation("validation.required.contact"))
+                .withValidator(new StringLengthValidator(
+                        TranslationUtils.getTranslation("validation.invalid.contact"), 10, 50))
+                .bind(Contact::getContact, Contact::setContact);
     }
 }
