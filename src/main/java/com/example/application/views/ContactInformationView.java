@@ -1,5 +1,6 @@
 package com.example.application.views;
 
+import com.example.application.dto.AddressType;
 import com.example.application.utils.TranslationUtils;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.router.PageTitle;
@@ -16,19 +17,25 @@ public class ContactInformationView extends SecuredView {
     private static final Logger LOGGER = LogManager.getLogger(ContactInformationView.class);
 
     private final ContactComponent contactComponent;
-
-    private final AddressComponent registrationAddress = new AddressComponent(TranslationUtils.getTranslation("addressInfo.title.registerAddress"));
-    private final AddressComponent currentAddress = new AddressComponent(TranslationUtils.getTranslation("addressInfo.title.currentAddress"));
-    private final AddressComponent placeOfBirthAddress = new AddressComponent(TranslationUtils.getTranslation("addressInfo.title.placeOfBirth"));
+    private final AddressComponent registrationAddress;
+    private final AddressComponent currentAddress;
+    private final AddressComponent placeOfBirthAddress;
+    private final AddressComponentFactory addressFactory;
 
     private final Button nextPageButton = new Button(TranslationUtils.getTranslation("button.label.next-page"));
 
-    public ContactInformationView(ContactComponent contactComponent) {
+    public ContactInformationView(ContactComponent contactComponent, AddressComponentFactory addressFactory) {
+
         this.contactComponent = contactComponent;
+        this.addressFactory = addressFactory;
 
         setSpacing(true);
         setPadding(true);
         setSizeFull();
+
+        registrationAddress = addressFactory.createAddressComponent(AddressType.REGISTRATION_ADDRESS);
+        currentAddress = addressFactory.createAddressComponent(AddressType.CURRENT_ADDRESS);
+        placeOfBirthAddress = addressFactory.createAddressComponent(AddressType.BIRTH_ADDRESS);
 
         configureNextPageButton();
 

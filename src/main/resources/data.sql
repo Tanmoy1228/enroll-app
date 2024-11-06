@@ -27,11 +27,21 @@ ALTER SEQUENCE schools_id_seq RESTART WITH 1;
 TRUNCATE TABLE addresses CASCADE;
 ALTER SEQUENCE addresses_id_seq RESTART WITH 1;
 
+TRUNCATE TABLE province CASCADE;
+ALTER SEQUENCE province_id_seq RESTART WITH 1;
+
+TRUNCATE TABLE region CASCADE;
+ALTER SEQUENCE region_id_seq RESTART WITH 1;
+
+TRUNCATE TABLE city CASCADE;
+ALTER SEQUENCE city_id_seq RESTART WITH 1;
+
+
 insert into country(name) values ('Bangladesh');
 insert into country(name) values ('Russia');
 insert into country(name) values ('Kyrgyzstan');
-insert into country(name) values ('Australia');
 insert into country(name) values ('Nepal');
+insert into country(name) values ('Australia');
 
 
 insert into nationality(name) values ('Bangladeshi');
@@ -115,5 +125,48 @@ insert into schools(address_id, name) values (9, 'International Hope School, Mel
 insert into schools(address_id, name) values (9, 'Metropolitan College, Melbourne');
 insert into schools(address_id, name) values (10, 'Milestone College, Sydney');
 insert into schools(address_id, name) values (10, 'Ispahani Public School and College, Sydney');
+
+
+insert into province(country_id, name) values (1, 'Bangladesh');
+insert into province(country_id, name) values (2, 'Astrakhanskaya obl.');
+insert into province(country_id, name) values (2, 'Bashkortostan');
+insert into province(country_id, name) values (3, 'Batken');
+insert into province(country_id, name) values (3, 'Chui');
+insert into province(country_id, name) values (3, 'Talas');
+insert into province(country_id, name) values (4, 'Nepal');
+insert into province(country_id, name) values (5, 'Melbourne');
+insert into province(country_id, name) values (5, 'Sydney');
+
+insert into region(province_id, name) values (1, 'Dhaka');
+insert into region(province_id, name) values (1, 'Khulna');
+insert into region(province_id, name) values (1, 'Comilla');
+insert into region(province_id, name) values (2, 'Astrakhanskaya');
+insert into region(province_id, name) values (3, 'Bashkortostan');
+insert into region(province_id, name) values (4, 'Batken district');
+insert into region(province_id, name) values (4, 'Leilek district');
+insert into region(province_id, name) values (5, 'Chui district');
+insert into region(province_id, name) values (5, 'Kemin district');
+insert into region(province_id, name) values (6, 'Talas district');
+insert into region(province_id, name) values (6, 'Manas district');
+insert into region(province_id, name) values (7, 'Thamel');
+insert into region(province_id, name) values (7, 'Pokhra');
+insert into region(province_id, name) values (8, 'Melbourne');
+insert into region(province_id, name) values (9, 'Sydney');
+
+insert into city(region_id, name) values (1, 'Dhaka');
+insert into city(region_id, name) values (2, 'Khulna');
+insert into city(region_id, name) values (3, 'Comilla');
+insert into city(region_id, name) values (4, 'Astrakhanskaya');
+insert into city(region_id, name) values (5, 'Bashkortostan');
+insert into city(region_id, name) values (6, 'Batken district');
+insert into city(region_id, name) values (7, 'Leilek district');
+insert into city(region_id, name) values (8, 'Chui district');
+insert into city(region_id, name) values (9, 'Kemin district');
+insert into city(region_id, name) values (10, 'Talas district');
+insert into city(region_id, name) values (11, 'Manas district');
+insert into city(region_id, name) values (12, 'Thamel');
+insert into city(region_id, name) values (13, 'Pokhra');
+insert into city(region_id, name) values (14, 'Melbourne');
+insert into city(region_id, name) values (15, 'Sydney');
 
 

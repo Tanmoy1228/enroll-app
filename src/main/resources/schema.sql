@@ -116,3 +116,24 @@ create table if not exists contacts (
     contact varchar(100) not null
 );
 
+create table if not exists province (
+    id BIGSERIAL primary key,
+    country_id BIGINT not null,
+    name varchar(100) not null,
+    CONSTRAINT UK_province_country_id FOREIGN KEY (country_id) REFERENCES country (id)
+);
+
+create table if not exists region (
+    id BIGSERIAL primary key,
+    province_id BIGINT not null,
+    name varchar(100) not null,
+    CONSTRAINT UK_region_province_id FOREIGN KEY (province_id) REFERENCES province (id)
+);
+
+create table if not exists city (
+    id BIGSERIAL primary key,
+    region_id BIGINT not null,
+    name varchar(100) not null,
+    CONSTRAINT UK_city_region_id FOREIGN KEY (region_id) REFERENCES region (id)
+);
+
