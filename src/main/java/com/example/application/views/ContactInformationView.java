@@ -3,8 +3,10 @@ package com.example.application.views;
 import com.example.application.dto.AddressType;
 import com.example.application.utils.TranslationUtils;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,6 +46,15 @@ public class ContactInformationView extends SecuredView {
 
     private void configureNextPageButton() {
 
+        nextPageButton.addClickListener(event -> {
+            if (areAllAddressesSaved()) {
+                VaadinSession.getCurrent().setAttribute("selectedTabIndex", 3);
+                getUI().ifPresent(ui -> ui.navigate(RelativesInformationView.class));
+            } else {
+                Notification.show(TranslationUtils.getTranslation("notification.fillFieldsCorrectly"), 3000, Notification.Position.TOP_CENTER);
+            }
+        });
+
         nextPageButton.getStyle()
                 .set("width", "300px")
                 .set("height", "50px")
@@ -51,6 +62,10 @@ public class ContactInformationView extends SecuredView {
                 .set("margin-left", "200px")
                 .set("margin-bottom", "200px")
                 .set("background-color", "#007bff");
+    }
+
+    private boolean areAllAddressesSaved() {
+        return registrationAddress.isViewOnlyMode() && currentAddress.isViewOnlyMode() && placeOfBirthAddress.isViewOnlyMode();
     }
 }
 

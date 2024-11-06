@@ -137,3 +137,14 @@ create table if not exists city (
     CONSTRAINT UK_city_region_id FOREIGN KEY (region_id) REFERENCES region (id)
 );
 
+create table if not exists address_info (
+    id BIGSERIAL PRIMARY KEY,
+    email VARCHAR(100) NOT NULL,
+    type VARCHAR(20) NOT NULL,
+    country_id BIGINT NOT NULL,
+    province_id BIGINT NOT NULL,
+    region_id BIGINT NOT NULL,
+    city_id BIGINT NOT NULL,
+    address_line VARCHAR(100) NOT NULL,
+    CONSTRAINT UK_address_info_email_type UNIQUE (email, type)
+);
