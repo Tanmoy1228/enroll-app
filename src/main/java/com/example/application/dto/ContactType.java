@@ -25,6 +25,10 @@ public enum ContactType {
         return code;
     }
 
+    public void refreshCode() {
+        code = TranslationUtils.getTranslation(translationKey);
+    }
+
     public static ContactType valueOff(String code) {
         for (ContactType type : ContactType.values()) {
             if (code.equals(type.getCode())) {

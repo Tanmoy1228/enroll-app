@@ -1,6 +1,7 @@
 package com.example.application.views;
 
 import com.example.application.services.UserService;
+import com.example.application.utils.TranslationUtils;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.applayout.AppLayout;
@@ -114,17 +115,17 @@ public class MainLayout extends AppLayout {
 
     private Tab[] createMenuItems() {
         return new Tab[] {
-                createTab("Main", BasicInformationView.class),
-                createTab("Choices and Education", EducationInformationView.class),
-                createTab("Contacts and Address", ContactInformationView.class),
-                createTab("Relatives Info", RelativesInformationView.class),
-                createTab("Apply", ApplyView.class),
+                createTab(TranslationUtils.getTranslation("menuItem.main"), BasicInformationView.class),
+                createTab(TranslationUtils.getTranslation("menuItem.education"), EducationInformationView.class),
+                createTab(TranslationUtils.getTranslation("menuItem.contact"), ContactInformationView.class),
+                createTab(TranslationUtils.getTranslation("menuItem.relative"), RelativesInformationView.class),
+                createTab(TranslationUtils.getTranslation("menuItem.apply"), ApplyView.class),
                 createLogoutTab()
         };
     }
 
     private Tab createLogoutTab() {
-        Tab logoutTab = new Tab("Log out");
+        Tab logoutTab = new Tab(TranslationUtils.getTranslation("menuItem.logout"));
         logoutTab.getElement().addEventListener("click", event -> logout());
         logoutTab.getStyle().set("font-size", "20px").set("font-weight", "bold").set("margin-top", "50px").set("cursor", "pointer");
         return logoutTab;

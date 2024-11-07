@@ -22,6 +22,10 @@ public enum AddressType {
         return code;
     }
 
+    public void refreshCode() {
+        code = TranslationUtils.getTranslation(translationKey);
+    }
+
     public static AddressType valueOff(String code) {
         for (AddressType type : AddressType.values()) {
             if (code.equals(type.getCode())) {

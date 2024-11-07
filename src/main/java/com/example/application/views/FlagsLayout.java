@@ -1,5 +1,8 @@
 package com.example.application.views;
 
+import com.example.application.dto.AddressType;
+import com.example.application.dto.ContactType;
+import com.example.application.dto.RelativeType;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.server.VaadinSession;
@@ -47,6 +50,19 @@ public class FlagsLayout extends HorizontalLayout {
         LOGGER.info("Language changed to {}", locale);
 
         VaadinSession.getCurrent().setLocale(locale);
+
+        for (AddressType addressType : AddressType.values()) {
+            addressType.refreshCode();
+        }
+
+        for (ContactType contactType : ContactType.values()) {
+            contactType.refreshCode();
+        }
+
+        for (RelativeType relativeType : RelativeType.values()) {
+            relativeType.refreshCode();
+        }
+
         getUI().ifPresent(ui -> ui.getPage().reload());
     }
 }

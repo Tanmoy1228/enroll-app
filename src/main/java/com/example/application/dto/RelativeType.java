@@ -4,12 +4,12 @@ import com.example.application.utils.TranslationUtils;
 
 public enum RelativeType {
 
-    FATHER("relativeInfo.contactType.mobile"),
-    MOTHER("contactInfo.contactType.home"),
-    BROTHER("contactInfo.contactType.work"),
-    SISTER("contactInfo.contactType.email"),
-    UNCLE("contactInfo.contactType.fax"),
-    AUNTY("contactInfo.contactType.office");
+    FATHER("relativeInfo.relativeType.father"),
+    MOTHER("relativeInfo.relativeType.mother"),
+    BROTHER("relativeInfo.relativeType.brother"),
+    SISTER("relativeInfo.relativeType.sister"),
+    UNCLE("relativeInfo.relativeType.uncle"),
+    AUNTY("relativeInfo.relativeType.aunty");
 
     private final String translationKey;
     private String code;
@@ -23,6 +23,10 @@ public enum RelativeType {
             code = TranslationUtils.getTranslation(translationKey);
         }
         return code;
+    }
+
+    public void refreshCode() {
+        code = TranslationUtils.getTranslation(translationKey);
     }
 
     public static RelativeType valueOff(String code) {
