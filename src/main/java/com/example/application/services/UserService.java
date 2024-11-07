@@ -8,4 +8,6 @@ public interface UserService {
 
     UserDto getUserByEmail(String email);
 
+    void updateUser(UserDto userDto);
+
 }

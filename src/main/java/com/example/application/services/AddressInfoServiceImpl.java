@@ -7,6 +7,8 @@ import com.example.application.utils.TranslationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class AddressInfoServiceImpl implements AddressInfoService {
 
@@ -32,5 +34,17 @@ public class AddressInfoServiceImpl implements AddressInfoService {
         }
 
         return addressInfo;
+    }
+
+    @Override
+    public List<AddressInfo> findAddressInfoByEmail(String email) {
+
+        List<AddressInfo> addressInfos = addressInfoRepository.findAddressInfoByEmail(email);
+
+        if (addressInfos == null) {
+            throw new BusinessException(TranslationUtils.getTranslation("exception.address-info-not-found"));
+        }
+
+        return addressInfos;
     }
 }
