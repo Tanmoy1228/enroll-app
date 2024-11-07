@@ -148,3 +148,26 @@ create table if not exists address_info (
     address_line VARCHAR(100) NOT NULL,
     CONSTRAINT UK_address_info_email_type UNIQUE (email, type)
 );
+
+create table if not exists relative_info (
+    id BIGSERIAL PRIMARY KEY,
+    email VARCHAR(100) NOT NULL,
+    type VARCHAR(20) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    surname VARCHAR(255) NOT NULL,
+    native_name VARCHAR(255) NOT NULL,
+    native_surname VARCHAR(255) NOT NULL,
+    patronymic VARCHAR(255),
+    date_of_birth DATE NOT NULL,
+    branch VARCHAR(255),
+    work_position VARCHAR(255),
+    work_place VARCHAR(255)
+);
+
+create table if not exists relative_contact (
+    id BIGSERIAL primary key,
+    type varchar(100) not null,
+    contact varchar(100) not null,
+    relative_info_id BIGINT NOT NULL,
+    CONSTRAINT UK_relative_info_contact_id FOREIGN KEY (relative_info_id) REFERENCES relative_info(id)
+);

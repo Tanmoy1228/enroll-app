@@ -1,32 +1,79 @@
 package com.example.application.entity;
 
 import com.example.application.dto.RelativeType;
+import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
+@Entity
+@Table(name = "relative_info")
 public class RelativeInfo {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "email", columnDefinition = "VARCHAR(100)", nullable=false)
+    private String email;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", columnDefinition = "VARCHAR(100)", nullable=false)
+    private RelativeType Relationship;
+
+    @Column(name = "name", columnDefinition = "VARCHAR(100)", nullable=false)
     private String name;
 
+    @Column(name = "surname", columnDefinition = "VARCHAR(100)", nullable=false)
     private String surname;
 
+    @Column(name = "native_name", columnDefinition = "VARCHAR(255)", nullable=false)
     private String nativeName;
 
+    @Column(name = "native_surname", columnDefinition = "VARCHAR(255)", nullable=false)
     private String nativeSurname;
 
+    @Column(name = "patronymic", columnDefinition = "VARCHAR(255)", nullable=false)
     private String patronymic;
 
+    @Column(name = "date_of_birth", nullable=false)
     private LocalDate birthDate;
 
+    @Column(name = "branch", columnDefinition = "VARCHAR(255)")
     private String branch;
 
+    @Column(name = "work_position", columnDefinition = "VARCHAR(255)")
     private String workPosition;
 
+    @Column(name = "work_place", columnDefinition = "VARCHAR(255)")
     private String workPlace;
 
-    private RelativeType relationship;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "relativeInfo")
+    private List<RelativeContact> relativeContacts;
 
-    private RelativeContact relativeContact;
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public RelativeType getRelationship() {
+        return Relationship;
+    }
+
+    public void setRelationship(RelativeType type) {
+        this.Relationship = type;
+    }
 
     public String getName() {
         return name;
@@ -100,19 +147,11 @@ public class RelativeInfo {
         this.workPlace = workPlace;
     }
 
-    public RelativeContact getRelativeContact() {
-        return relativeContact;
+    public List<RelativeContact> getRelativeContacts() {
+        return relativeContacts;
     }
 
-    public void setRelativeContact(RelativeContact relativeContact) {
-        this.relativeContact = relativeContact;
-    }
-
-    public RelativeType getRelationship() {
-        return relationship;
-    }
-
-    public void setRelationship(RelativeType relationship) {
-        this.relationship = relationship;
+    public void setRelativeContacts(List<RelativeContact> relativeContacts) {
+        this.relativeContacts = relativeContacts;
     }
 }
